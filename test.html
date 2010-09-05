@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<title>qr code</title>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<link rel="stylesheet" href="http://view.jquery.com/trunk/qunit/testsuite.css" type="text/css" media="screen" />
+<script type="text/javascript" src="http://view.jquery.com/trunk/qunit/testrunner.js"></script>
+<script language="JavaScript">
+//モード指示子(mode indicator)
+var _encode_mode = {
+	numeric:		0x01 //数字モード
+	,alphabetic:	0x02 //英数モード
+	,octetbyte:		0x04 //8bitバイトモード
+	,multibyte:		0x08 //漢字モード
+};
+//文字数指示子(character count indicator)
+var _char_count = [];
+_char_count[_encode_mode.numeric]		= [10,12,14];
+_char_count[_encode_mode.alphabetic]	= [ 9,11,13];
+_char_count[_encode_mode.octetbyte]		= [ 8,16,16];
+_char_count[_encode_mode.multibyte]		= [ 8,10,12];
+
+
+var _c = {
+	numeric:	{//数字モード
+		typecode: 0x01
+		,charcount:	[10,12,14]
+		,chardic: '0123456789'
+		,selectid: 0
+		,bitblock: 10
+		,baselen: 0
+		,transcode: function (str){
+			var _len = str.length;
+			var _ret = [];
+			this.baselen = _len;
+			for(var i=0;i<_len;i+=3)
+			{
+				_ret.push(parseInt(str.substr(i,3),10));
+			}
+			return _ret;
+		}
+		
+	}
+	,alphabetic:{//英数モード
+		typecode: 0x02
+		,charcount:	[ 9,11,13]
+		,chardic: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:'
+		,bitblock: 11
+		,baselen: 0
+		,transcode: function (str){
+			var _len = this.chardic.length;
+			var _ret = [];
+			var _cache = [];
+			for(var i=0;i<_len;i++)
+			{
+				_cache[this.chardic.substr(i,1)] = i;
+			}
+			_len = str.length;
+			this.baselen = _len;
+			for(var i=0;i<_len;i+=2)
+			{
+				
+				_ret.push(parseInt(str.substr(i,3),10));
+			}
+			return _ret;
+		}
+	
+	}
+	,octetbyte:	{//8bitバイトモード
+		typecode: 0x04
+		,charcount:	[ 8,16,16]
+	}
+	,multibyte:	{//漢字モード
+		typecode: 0x08
+		,charcount:	[ 8,10,12]
+	}
+	,bitstrage: function(_packbits){
+		this._data= [];
+		this._restbit= 0;
+		this._packbit= _packbits;
+		this.getData = function () {return this._data;};
+		this.pushData= function (_val,bitlen){
+			//エラーチェックが必要 
+			//残処理
+			if(this._restbit>0 && this._data.length > 0){
+				if(bitlen<this._restbit){
+					this._data.push(this._data.pop()|((_val > 0)?(_val<<(this._restbit-bitlen)):0));
+					this._restbit = this._restbit-bitlen;
+					bitlen = 0;
+				} else {
+					var _shift = bitlen-this._restbit;
+					var _working = _val >> _shift;
+					_val = _val ^ (_working<<_shift);
+					this._data.push(this._data.pop()|_working);
+					bitlen -= this._restbit;
+					this._restbit = 0;
+				}
+			}
+			//新規格納処理 
+			while(bitlen>0){
+				if(bitlen<this._packbit){
+					this._data.push(((_val > 0)?(_val<<(this._packbit-bitlen)):0));
+					this._restbit = this._packbit-bitlen;
+					bitlen = 0;
+				} else {
+					var _shift = bitlen-this._packbit;
+					var _working = _val >> _shift;
+					_val = _val ^ (_working<<_shift);
+					this._data.push(_working);
+					bitlen -= this._packbit;
+					this._restbit = 0;
+				}
+			}
+			
+		};
+	}
+}
+/******************************************************************
+ * test area
+ */
+		try{
+$(document).ready(function (){
+	module("BitStrage");
+	var _bitstrage = _c.bitstrage;
+	test("New test",function(){
+		try{
+			var _ins = new _bitstrage(8);
+			ok( true, "New Instrance ok" );
+		} catch(e) {
+			failed( false, "New Failed" );
+		}
+	});
+	test("Bit add",function(){
+		var _ins = new _bitstrage(8);
+		_ins.pushData(0x1,1);
+		same( _ins.getData(), [0x80], "Multi add data" );
+	//	same( _ins._restbit, 7, "Internal data check" );
+		_ins.pushData(0x1,1);
+		same( _ins.getData(), [0xC0], "Multi add data" );
+	//	same( _ins._restbit, 6, "Internal data check" );
+		_ins.pushData(0x1,1);
+		same( _ins.getData(), [0xE0], "Multi add data" );
+	//	same( _ins._restbit, 5, "Internal data check" );
+		_ins.pushData(0x1,1);
+		same( _ins.getData(), [0xF0], "Multi add data" );
+	//	same( _ins._restbit, 4, "Internal data check" );
+		_ins.pushData(0,4);
+		same( _ins.getData(), [0xF0], "Multi add data" );
+	//	same( _ins._restbit, 0, "Internal data check" );
+		_ins.pushData(0xF,4);
+		same( _ins.getData(), [0xF0,0xF0], "Multi add data" );
+		_ins.pushData(0xF,4);
+		same( _ins.getData(), [0xF0,0xFF], "Multi add data" );
+		_ins.pushData(0xFFFF,16);
+		same( _ins.getData(), [0xF0,0xFF,0xFF,0xFF], "Multi add data" );
+	});
+});
+		} catch(e) {}
+</script>
+</head>
+<body>
+<h1>QUnit example</h1>
+<h2 id="banner"></h2>
+<h2 id="userAgent"></h2>
+<ol id="tests">
+</ol>
+<div id="main">
+</div>
+
+</body>
+</html>
