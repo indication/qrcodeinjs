@@ -1,5 +1,6 @@
 /**
  * Galois.java
+ * @author Masayuki Miyazaki
  * @see http://sourceforge.jp/projects/reedsolomon/
  */
 
@@ -58,7 +59,7 @@ var galois = {
 	 * @param a int
 	 * @return int
 	 */
-	toExp: function (a){		return this._expTbl[a];}
+	toExp: function (a){		return this._expTbl[a];},
 	/**
 	 * ベクター -> スカラー変換
 	 *
@@ -153,6 +154,56 @@ var galois = {
 		}
 		return (hasErr == 0);
 	 }
+};
+
+/**
+ * タイトル: RSコード・エンコーダ
+ *
+ * @author Masayuki Miyazaki
+ * http://sourceforge.jp/projects/reedsolomon/
+ */
+rsEncode = function (npar){
+	this.parity = function (npar){
+		if(!npar){
+			return this.npar;
+		}
+		if(this.npar == npar){
+			return this;
+		}
+		this.npar = npar;
+		this.encodeGx = new Array(npar);
+		this.encodeGx[npar - 1] = 1;
+		for(var kou = 0; kou < npar; kou++) {
+			var ex = galois.toExp(kou);			// ex = α^kou
+			// (x + α^kou)を掛る
+			for(var i = 0; i < npar - 1; i++) {
+				// 現在の項 * α^kou + 一つ下の次数の項
+				this.encodeGx[i] = galois.mul(this.encodeGx[i], ex) ^ this.encodeGx[i + 1];
+			}
+			this.encodeGx[npar - 1] = galois.mul(this.encodeGx[npar - 1], ex);		// 最下位項の計算
+		}
+		return this;
+	}
+	this.encode = function (data,len){
+		if(!len){
+			len = data.length;
+		}
+		if(len < 0 || len + this.npar > 255) {
+			return [];
+		}
+		var wr = new Array(this.npar);
+		for(var idx = 0; idx < len; idx++) {
+			var code = data[idx];
+			var  ib = wr[0] ^ code;
+			for(var i = 0; i < npar - 1; i++) {
+				wr[i] = wr[i + 1] ^ galois.mul(ib, this.encodeGx[i]);
+			}
+			wr[npar - 1] = galois.mul(ib, this.encodeGx[npar - 1]);
+		}
+		return wr;
+	}
+	// コンストラクタをコール 
+	this.parity(npar);
 };
 /*
 // 初期値の計算処理 

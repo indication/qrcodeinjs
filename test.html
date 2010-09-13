@@ -5,6 +5,11 @@
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 <link rel="stylesheet" href="http://view.jquery.com/trunk/qunit/testsuite.css" type="text/css" media="screen" />
 <script type="text/javascript" src="http://view.jquery.com/trunk/qunit/testrunner.js"></script>
+<script type="text/javascript" src="readsolomon.js"></script>
+<script type="text/javascript" src="bitstage.js"></script>
+<script type="text/javascript" src="bitstage.test.js"></script>
+<script type="text/javascript" src="reedsolomon.js"></script>
+<script type="text/javascript" src="reedsolomon.test.js"></script>
 <script language="JavaScript">
 //モード指示子(mode indicator)
 var _encode_mode = {
@@ -74,88 +79,9 @@ var _c = {
 		typecode: 0x08
 		,charcount:	[ 8,10,12]
 	}
-	,bitstrage: function(_packbits){
-		this._data= [];
-		this._restbit= 0;
-		this._packbit= _packbits;
-		this.getData = function () {return this._data;};
-		this.pushData= function (_val,bitlen){
-			//エラーチェックが必要 
-			//残処理
-			if(this._restbit>0 && this._data.length > 0){
-				if(bitlen<this._restbit){
-					this._data.push(this._data.pop()|((_val > 0)?(_val<<(this._restbit-bitlen)):0));
-					this._restbit = this._restbit-bitlen;
-					bitlen = 0;
-				} else {
-					var _shift = bitlen-this._restbit;
-					var _working = _val >> _shift;
-					_val = _val ^ (_working<<_shift);
-					this._data.push(this._data.pop()|_working);
-					bitlen -= this._restbit;
-					this._restbit = 0;
-				}
-			}
-			//新規格納処理 
-			while(bitlen>0){
-				if(bitlen<this._packbit){
-					this._data.push(((_val > 0)?(_val<<(this._packbit-bitlen)):0));
-					this._restbit = this._packbit-bitlen;
-					bitlen = 0;
-				} else {
-					var _shift = bitlen-this._packbit;
-					var _working = _val >> _shift;
-					_val = _val ^ (_working<<_shift);
-					this._data.push(_working);
-					bitlen -= this._packbit;
-					this._restbit = 0;
-				}
-			}
-			
-		};
-	}
+	
 }
-/******************************************************************
- * test area
- */
-		try{
-$(document).ready(function (){
-	module("BitStrage");
-	var _bitstrage = _c.bitstrage;
-	test("New test",function(){
-		try{
-			var _ins = new _bitstrage(8);
-			ok( true, "New Instrance ok" );
-		} catch(e) {
-			failed( false, "New Failed" );
-		}
-	});
-	test("Bit add",function(){
-		var _ins = new _bitstrage(8);
-		_ins.pushData(0x1,1);
-		same( _ins.getData(), [0x80], "Multi add data" );
-	//	same( _ins._restbit, 7, "Internal data check" );
-		_ins.pushData(0x1,1);
-		same( _ins.getData(), [0xC0], "Multi add data" );
-	//	same( _ins._restbit, 6, "Internal data check" );
-		_ins.pushData(0x1,1);
-		same( _ins.getData(), [0xE0], "Multi add data" );
-	//	same( _ins._restbit, 5, "Internal data check" );
-		_ins.pushData(0x1,1);
-		same( _ins.getData(), [0xF0], "Multi add data" );
-	//	same( _ins._restbit, 4, "Internal data check" );
-		_ins.pushData(0,4);
-		same( _ins.getData(), [0xF0], "Multi add data" );
-	//	same( _ins._restbit, 0, "Internal data check" );
-		_ins.pushData(0xF,4);
-		same( _ins.getData(), [0xF0,0xF0], "Multi add data" );
-		_ins.pushData(0xF,4);
-		same( _ins.getData(), [0xF0,0xFF], "Multi add data" );
-		_ins.pushData(0xFFFF,16);
-		same( _ins.getData(), [0xF0,0xFF,0xFF,0xFF], "Multi add data" );
-	});
-});
-		} catch(e) {}
+
 </script>
 </head>
 <body>
@@ -166,6 +92,7 @@ $(document).ready(function (){
 </ol>
 <div id="main">
 </div>
+
 
 </body>
 </html>
