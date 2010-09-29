@@ -84,17 +84,160 @@ var _c = {
 	
 }
 
+function mapNew(version){
+	var matrix = 17 + (4 * version);
+	var _mx = new Array(matrix);
+	for(var i=0;i<matrix;i++){
+		var _line = new Array(matrix);
+		_mx[i] = _line;
+	}
+	// タイミングパターン
+	for(var i=7;i<matrix;i++){
+		_mx[6][i] = _mx[i][6] = ((i%2)==0?3:2);
+	}
+	// 目玉の描画 
+	// 上部
+	mapArea(_mx,7,0,7,7,2);	//縦
+	mapArea(_mx,0,7,7,7,2);	//横
+	mapSymbolBig(_mx,0			,0			);
+	// 右部
+	mapArea(_mx,matrix-8,0,matrix-8,7,2);	//縦
+	mapArea(_mx,matrix-7,7,matrix  ,7,2);	//横
+	mapSymbolBig(_mx,matrix-7	,0			);
+	// 下部
+	mapArea(_mx,7,matrix-7,7,matrix  ,2);	//縦
+	mapArea(_mx,0,matrix-8,7,matrix-8,2);	//横
+	mapSymbolBig(_mx,0			,matrix-7	);
+	mapPoint(_mx,9,matrix-7,3);
+	
+	// 小さい目玉の描画 
+	var _areas = [
+		 {small:[16,16]}
+		,{small:[20,20]}
+		,{small:[24,24]}
+		,{small:[28,28]}
+		,{small:[32,32]}		//v7
+		,{small:[4,20,	20,4,	20,20,	20,36,	36,20,	36,36]}
+		,{small:[4,22,	22,4,	22,22,	22,40,	40,22,	40,40]}
+		,{small:[4,24,	24,4,	24,24,	24,44,	44,24,	44,44]}
+		,{small:[4,26,	26,4,	26,26,	26,48,	48,26,	48,48]}
+		,{small:[4,28,	28,4,	28,28,	28,52,	52,28,	52,52]}
+		,{small:[4,30,	30,4,	30,30,	30,56,	56,30,	56,56]}
+		,{small:[4,32,	32,4,	32,32,	32,60,	60,32,	60,60]}
+		//v14
+		
+	];
+	if(version>=2 && (version-2)<_areas.length){
+		var smallmaps = _areas[version-2].small;
+		for(var i=0;i<smallmaps.length;i+=2){
+			mapSymbolSmall(_mx,smallmaps[i],smallmaps[i+1]);
+		}
+	}
+	
+	
+	
+	//勝手に描画 
+	var _canvas = document.getElementById('drawarea');
+	var _cellsize = 4;
+	if ( _canvas && _canvas.getContext ) {
+		_canvas.width = _canvas.height = _mx.length * _cellsize;
+		var ctx = _canvas.getContext('2d');
+		ctx.width = ctx.height = _mx.length * _cellsize;
+		ctx.fillStyle = "rgb(0, 0, 0)";
+		for(var i=0;i<matrix;i++){
+			for(var k=0;k<matrix;k++){
+				if(!_mx[i][k] || !(_mx[i][k] & 0x01)){continue;}
+				ctx.fillRect(k*_cellsize, i*_cellsize, _cellsize, _cellsize);
+			}
+		}
+	}
+	//テキストでの情報表示 
+	if(false){
+	for(var i=0;i<matrix;i++){
+		for(var k=0;k<matrix;k++){
+			$('#logarea').append((_mx[i][k])?_mx[i][k]:0);
+		}
+		$('#logarea').append('<br />');
+	}
+	}
+}
+/*
+7
+000010
+011110
+100110
+
+
+8
+010001
+011100
+111000
+
+9
+110111
+011000
+000100
+
+10
+
+
+
+*/
+function mapSymbolBig(matrix,posx,posy){
+	mapArea(matrix,posx  ,posy  ,posx+6,posy+6,3); //全体
+	mapArea(matrix,posx+1,posy+1,posx+5,posy+1,2); //上
+	mapArea(matrix,posx+1,posy+2,posx+1,posy+5,2); //左
+	mapArea(matrix,posx+5,posy+2,posx+5,posy+5,2); //右
+	mapArea(matrix,posx+2,posy+5,posx+5,posy+5,2); //下
+}
+function mapSymbolSmall(matrix,posx,posy){
+	mapArea(matrix,posx  ,posy  ,posx+4,posy+4,3); //全体
+	mapArea(matrix,posx+1,posy+1,posx+3,posy+1,2); //上
+	mapArea(matrix,posx+1,posy+2,posx+1,posy+3,2); //左
+	mapArea(matrix,posx+3,posy+2,posx+3,posy+3,2); //右
+	mapArea(matrix,posx+2,posy+3,posx+3,posy+3,2); //下
+}
+function mapArea(matrix,fromx,fromy,tox,toy,mask,cbfunc){
+	for(valx=fromx;valx<=tox;valx++){
+		for(valy=fromy;valy<=toy;valy++){
+			mapPoint(matrix,valx,valy,mask,cbfunc);
+		}
+	}
+}
+function mapPoint(matrix,posx,posy,mask,cbfunc){
+	if(cbfunc){
+		matrix[posy][posx] = cbfunc(posx,posy,mask);
+	} else if(mask === null) {
+		var _val = matrix[posy][posx];
+		return _val;
+	} else {
+		if(matrix.length<=posy){
+			//alert(posy);
+			return;
+		}
+		if(matrix[posy].length<=posx){
+			//alert(posx);
+			return;
+		}
+		matrix[posy][posx] = mask;
+	}
+}
+$(document).ready(function (){
+	mapNew(7);
+});
+
 </script>
 </head>
 <body>
-<h1>QUnit example</h1>
+<h1>QUnit QRcode</h1>
 <h2 id="banner"></h2>
 <h2 id="userAgent"></h2>
 <ol id="tests">
 </ol>
 <div id="main">
 </div>
-
+<div id="logarea"></div>
+<canvas id="drawarea"></canvas>
 
 </body>
 </html>
