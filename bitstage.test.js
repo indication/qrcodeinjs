@@ -35,5 +35,27 @@ $(document).ready(function (){
 		_ins.push(0xFFFF,16);
 		same( _ins.get(), [0xF0,0xFF,0xFF,0xFF], "Multi add data" );
 	});
+	test("Bit unshift",function(){
+		var _ins = new _bitstrage(8);
+		_ins.push(0x0F,8);
+		same( _ins.unshiftbit(), false, "0x0F unshift bit" );
+		same( _ins.unshiftbit(), false, "0x0F unshift bit" );
+		same( _ins.unshiftbit(), false, "0x0F unshift bit" );
+		same( _ins.unshiftbit(), false, "0x0F unshift bit" );
+		same( _ins.unshiftbit(), true, "0x0F unshift bit" );
+		same( _ins.unshiftbit(), true, "0x0F unshift bit" );
+		same( _ins.unshiftbit(), true, "0x0F unshift bit" );
+		same( _ins.unshiftbit(), true, "0x0F unshift bit" );
+		same( _ins.unshiftbit(), null, "0x0F unshift bit" );
+	});
+	test("Bit unshift",function(){
+		var _ins = new _bitstrage(8);
+		_ins.push(0x0F,4);
+		same( _ins.unshiftbit(), true, "0xF unshift bit" );
+		same( _ins.unshiftbit(), true, "0xF unshift bit" );
+		same( _ins.unshiftbit(), true, "0xF unshift bit" );
+		same( _ins.unshiftbit(), true, "0xF unshift bit" );
+		same( _ins.unshiftbit(), null, "0xF unshift bit" );
+	});
 });
 		} catch(e) {}
