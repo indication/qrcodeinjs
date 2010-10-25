@@ -105,7 +105,7 @@ function _alphabetic(str,level){
 	for(var i=0;i<_len;i+=2)
 	{
 		var _work = (_cache[str.substr(i,1)]*_len) + _cache[str.substr(i+1,1)];
-		_bitwork.pushData(_work,11);
+		_bitwork.push(_work,11);
 	}
 	return _bitwork;
 }
@@ -113,7 +113,7 @@ function _alphabetic(str,level){
 
 function _getHeader(ver,typecode,charcounts,len){
 	var bitst = new bitstrage(8);
-	bitst.pushData(ver,4);
+	bitst.push(ver,4);
 	var _countInputCounts = 0;
 	if(ver<1){
 		return null;
@@ -126,7 +126,7 @@ function _getHeader(ver,typecode,charcounts,len){
 	} else {
 		return null;
 	}
-	bitst.pushData(len,_countInputCounts);
+	bitst.push(len,_countInputCounts);
 	return bitst;
 }
 
