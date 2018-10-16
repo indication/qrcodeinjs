@@ -1,4 +1,4 @@
-var bitstrage =  function(_packbits){
+bitstrage =  function(_packbits){
 	this._data= [];
 	this._restbit= 0;
 	this._packbit= _packbits;

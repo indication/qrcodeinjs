@@ -1,23 +1,18 @@
 
+	QUnit.module("ReedSolomon");
+	QUnit.test("New test",function(assert){
 		try{
-$(document).ready(function (){
-	module("ReedSolomon");
-	var _rsencode = rsEncode;
-	test("New test",function(){
-		try{
-			var _ins = new _rsencode(8);
-			ok( true, "New Instrance ok" );
-			equals(_ins.parity(),8,"Get parity count");
+			var _ins = new rsEncode(8);
+			assert.ok( true, "New Instrance ok" );
+			assert.equal(_ins.parity(),8,"Get parity count");
 		} catch(e) {
-			failed( false, "New Failed" );
+			assert.failed( false, "New Failed" );
 		}
 	});
-	test("Calc rsEncode",function(){
+	QUnit.test("Calc rsEncode",function(assert){
 		var data = [32, 65, 205, 69, 41, 220, 46, 128, 236];
-		enc = new _rsencode(17);
-		parity = enc.encode(data);
-		same(parity,[42, 159, 74, 221, 244, 169, 239, 150, 138, 70, 237, 85, 224, 96, 74, 219, 61],'parity data');
+		var enc = new rsEncode(17);
+		var parity = enc.encode(data);
+		assert.deepEqual(parity,[42, 159, 74, 221, 244, 169, 239, 150, 138, 70, 237, 85, 224, 96, 74, 219, 61],'parity data');
 
 	});
-});
-		} catch(e) {}

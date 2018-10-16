@@ -2,19 +2,13 @@
 <html lang="ja">
 <head>
 <title>qr code</title>
-<script src="http://code.jquery.com/jquery-latest.js"></script>
-<link rel="stylesheet" href="http://view.jquery.com/trunk/qunit/testsuite.css" type="text/css" media="screen" />
-<script type="text/javascript" src="http://view.jquery.com/trunk/qunit/testrunner.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script type="text/javascript" src="readsolomon.js"></script>
 <script type="text/javascript" src="bitstage.js"></script>
-<script type="text/javascript" src="bitstage.test.js"></script>
 <script type="text/javascript" src="reedsolomon.js"></script>
-<script type="text/javascript" src="reedsolomon.test.js"></script>
 <script type="text/javascript" src="bch_15_5.js"></script>
-<script type="text/javascript" src="bch_15_5.test.js"></script>
 <script type="text/javascript" src="qrcode.base.js"></script>
 <script type="text/javascript" src="qrcode.symbol.calcsize.js"></script>
-<script type="text/javascript" src="qrcode.symbol.calcsize.test.js"></script>
 <script type="text/javascript" src="qrcode.symbol.drawer.js"></script>
 <script language="JavaScript">
 //モード指示子(mode indicator)
@@ -188,7 +182,7 @@ function getRsBlockInfo(ver,level){
 	};
 }
 
-function mapNew(version,bitstrage){
+function mapNew(version){
 	var _mx = qrcode.symbol.mapNew(version)
 	var matrix = _mx.length;
 	var isUp = true;
@@ -230,7 +224,7 @@ function mapNew(version,bitstrage){
 		}
 	}
 	//テキストでの情報表示 
-	if(false){
+	else {
 	for(var i=0;i<matrix;i++){
 		for(var k=0;k<matrix;k++){
 			$('#logarea').append((_mx[i][k])?_mx[i][k]:0);

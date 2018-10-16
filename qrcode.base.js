@@ -1,3 +1,3 @@
-var qrcode={
+qrcode={
 	symbol:{}
 };
